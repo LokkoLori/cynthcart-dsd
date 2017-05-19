@@ -28,14 +28,70 @@
     lda #$35 //we turn off the BASIC and KERNAL rom here
     sta $01 //the cpu now sees RAM everywhere except at $d000-$e000, where still the registers of
 
-    :writeAddress($fffe,irq)
+    :writeAddress($fffe,vicirq)
 	
 	cli
 	
 loop:
+	jsr readkeyboard
 	jmp loop
 	
-irq:
+	.import source "keys.asm"
+
+readkeyboard:
+	// clear notes
+	lda #255
+	sta KeyA
+	sta KeyB
+	sta KeyC
+	sta KeyD
+	sta KeyF
+
+	ldx #4
+	ldy #0
+	// check for note keys being pressed
+checkLoop:
+	//lda #0
+	//sta $dc02
+	//lda $dc00
+	//sta 1060
+	
+	//lda #ff
+	//sta $dc02
+	lda col,y
+	beq quitCheck
+	sta 56320
+	lda 56321
+	and row,y
+	bne notPressed
+	tya
+	clc
+	adc keyOffset
+	sta KeyA,x
+	dex
+	bmi quitCheck
+notPressed:
+	iny
+	jmp checkLoop
+
+quitCheck:
+
+	//lda keyTimer
+	//beq contReadKeys
+	
+	ldx #5
+	ldy #0
+printkey:
+	
+	lda KeyA,y
+	sta 1024,y
+	iny
+	dex
+	bne printkey
+	
+	rts
+	
+vicirq:
 
     pha  //store registers into stack
     txa
@@ -50,8 +106,8 @@ irq:
     sta SCR_BORDER_COLOR
     lda #WHITE
     sta SCR_BACK_COLOR
-
-	jsr irqmain
+	
+	//do the visual
 	
 	lda #LIGHT_GREEN
     sta SCR_BACK_COLOR
@@ -64,7 +120,4 @@ irq:
 
     rti
 	
-irqmain:
-	rts
-	
-	.print "irqmain=$"+toHexString(irqmain)
+.print "success"

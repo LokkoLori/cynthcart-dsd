@@ -1,1 +1,1 @@
-java -jar ..\KickAssembler\KickAss.jar cynthDSD.asm
+java -jar ..\KickAssembler\KickAss.jar cynth-dsd.asm

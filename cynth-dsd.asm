@@ -30,6 +30,8 @@
 
     :writeAddress($fffe,irq)
 	
+	cli
+	
 loop:
 	jmp loop
 	
@@ -48,9 +50,6 @@ irq:
     sta SCR_BORDER_COLOR
     lda #WHITE
     sta SCR_BACK_COLOR
-	
-	lda 36
-	sta 1024
 
 	jsr irqmain
 	
@@ -66,7 +65,6 @@ irq:
     rti
 	
 irqmain:
-	
 	rts
 	
 	.print "irqmain=$"+toHexString(irqmain)

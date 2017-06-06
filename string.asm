@@ -1,40 +1,54 @@
-.var inputbyte_lower = $DC00
-.var inputbyte_upper = $DC01
+.var input_lo = $DC00
+.var input_up = $DC01
 
 
 .macro handlestring(keyrows, keycols, tunning, sidchannel)
 {
-	.var actbund = 0
-	.var prevbund = 1
-	.var soundtime = 2
-	
-readloop:
+	//init readloop
+	lda #$ff
+	sta handlefret
 	ldy #0
+readloop:
 	lda keycols,y
 	beq endread
-	sta inputbyte_lower
-	lda inputbyte_upper
+	sta input_lo
+	lda input_up
 	and keyrows,y
 	bne notPressed
 	tya
 	clc
-	adc keyOffset
-	bmi quitCheck
+	sta handlefret
+	jmp endread
 notPressed:
 	iny
 	jmp readloop
+	
 endread:
+
+	lda actfret
+	sta prevfret
+	lda handlefret
+	sta actfret
 	jmp end
 	
-
-data:
-	.byte 0, 0, 0, 0
-	.macro ldval(offs){
-		lda data+offs
-	}
-	.macro stval(offs){
-		sta data+offs
-	}
+//variables storage and constructor
+actfret:
+	.byte 0
+prevfret:
+	.byte 0
+handlefret:
+	.byte 0
+soundtime:
+	.byte 0, 0
 end:
+	
+	ldx prevfret
+	lda #32
+	sta 1024+tunning,x
+	ldx actfret
+	lda #160
+	sta 1024+tunning,x
+	
 	nop
 }
+ 

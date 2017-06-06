@@ -32,92 +32,37 @@
 	
 	cli
 	
+	
+	.import source "string.asm"
+	
 loop:
-	jsr readkeyboard
 	jmp loop
 	
-	.import source "keys.asm"
 
-readkeyboard:
-	// clear notes
-	lda #255
-	sta KeyA
-	sta KeyB
-	sta KeyC
-	sta KeyD
-	sta KeyF
-
-	ldx #4
-	ldy #0
-	// check for note keys being pressed
-checkLoop:
-	//lda #0
-	//sta $dc02
-	//lda $dc00
-	//sta 1060
-	
-	//lda #ff
-	//sta $dc02
-	lda col,y
-	beq quitCheck
-	sta 56320
-	lda 56321
-	and row,y
-	bne notPressed
-	tya
-	clc
-	adc keyOffset
-	sta KeyA,x
-	dex
-	bmi quitCheck
-notPressed:
-	iny
-	jmp checkLoop
-
-quitCheck:
-
-	//lda keyTimer
-	//beq contReadKeys
-	
-	ldx #5
-	ldy #0
-printkey:
-	
-	lda KeyA,y
-	sta 1024,y
-	iny
-	dex
-	bne printkey
-	
-	rts
-	
 vicirq:
+	:handlestring(qrow, qcol, 0, 0)
+	:handlestring(arow, acol, 40, 0)
+	:handlestring(zrow, zcol, 80, 0)
+	rti
 
-    pha  //store registers into stack
-    txa
-    pha       
-    tya
-    pha      
-
-    lda #$ff //necessary
-    sta $d019
-
-    lda #BLACK
-    sta SCR_BORDER_COLOR
-    lda #WHITE
-    sta SCR_BACK_COLOR
+//        *    @    p    o    i    u    y    t    r    e    w    q
+qcol:                     
+	.byte $BF, $DF, $DF, $EF, $EF, $F7, $F7, $FB, $FB, $FD, $FD, $7F, 0
+qrow:                     
+	.byte $02, $40, $02, $40, $02, $40, $02, $40, $02, $40, $02, $40
 	
-	//do the visual
+
+//        =    ; 	:    L    K    J    H    G    F    D    S    A
+acol:
+	.byte $BF, $BF, $DF, $DF, $EF, $EF, $F7, $F7, $FB, $FB, $FD, $FD, 0
+arow:
+	.byte $20, $04, $20, $04, $20, $04, $20, $04, $20, $04, $20, $04
 	
-	lda #LIGHT_GREEN
-    sta SCR_BACK_COLOR
 
-    pla  //restore registers from stack
-    tay       
-    pla 
-    tax       
-    pla        
-
-    rti
+//        RS   /    .    ,    M    N    B    V    C    X    Z    LS
+zcol:
+	.byte $BF, $BF, $DF, $DF, $EF, $EF, $F7, $F7, $FB, $FB, $FD, $FD, 0
+zrow:
+	.byte $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80
 	
 .print "success"

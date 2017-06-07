@@ -36,10 +36,23 @@
 
 
 loop:
+	//saving joystate
+	lda #0
+	sta $dc02
+	lda $dc00
+	sta joystate
+	sta 1900
+	//release joy
+	lda #$ff
+	sta $dc02
+	
 	:handlestring(qrow, qcol, 0, 0)
 	:handlestring(arow, acol, 40, 0)
 	:handlestring(zrow, zcol, 80, 0)
 	jmp loop
+	
+joystate:
+	.byte 0
 	
 cntr:
 	.byte 0

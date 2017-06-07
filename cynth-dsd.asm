@@ -46,12 +46,15 @@ loop:
 	lda #$ff
 	sta $dc02
 	
-	:handlestring(qrow, qcol, 0, 0)
-	:handlestring(arow, acol, 40, 0)
-	:handlestring(zrow, zcol, 80, 0)
+	:handlestring(qrow, qcol, 12, 0, 0)
+	:handlestring(arow, acol, 12, 40, 0)
+	:handlestring(zrow, zcol, 12, 80, 0)
 	jmp loop
 	
 joystate:
+	.byte 0
+	
+free:
 	.byte 0
 	
 cntr:

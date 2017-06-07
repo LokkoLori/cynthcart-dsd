@@ -1,8 +1,19 @@
 .var input_lo = $DC00
 .var input_up = $DC01
 
+.macro invertfret(fret, keylen)
+{
+	lda #0
+	clc
+	sbc fret
+	sta free
+	lda #keylen
+	clc
+	adc free
+	tax
+}
 
-.macro handlestring(keyrows, keycols, tunning, sidchannel)
+.macro handlestring(keyrows, keycols, keylen, tunning, sidchannel)
 {
 	//init readloop
 	lda #$ff
@@ -11,7 +22,10 @@
 	
 	//jump to pick if joysick
 	cmp joystate
-	bne pick
+	bne skip
+	jmp readloop
+skip:
+	jmp pick
 	
 readloop:
 	lda keycols,y
@@ -52,7 +66,7 @@ fretchange:
 	lda gotfret
 	sta actfret
 	
-	ldx prevfret
+	:invertfret(prevfret, keylen)
 	lda #32
 	sta 1024+tunning,x
 	
@@ -64,7 +78,7 @@ release:
 	jmp end
 	
 touch:	
-	ldx actfret
+	:invertfret(actfret, keylen)
 	lda #160
 	sta 1024+tunning,x
 
@@ -88,6 +102,8 @@ gotfret:
 	.byte $ff
 soundtime:
 	.byte 0, 0
+free:
+	.byte 0
 
 pick:
 	lda actfret
@@ -96,7 +112,7 @@ pick:
 	jmp end
 	
 sound:
-	ldx actfret
+	:invertfret(actfret, keylen)
 	lda #161
 	sta 1024+tunning,x
 	

@@ -1,5 +1,6 @@
 .var input_lo = $DC00
 .var input_up = $DC01
+.var sid = $D400
 
 .macro invertfret(fret, keylen)
 {
@@ -13,19 +14,16 @@
 	tax
 }
 
-.macro handlestring(keyrows, keycols, keylen, tunning, sidchannel)
+.macro handlestring(keyrows, keycols, keylen, sidc, tunning, visoff)
 {
 	//init readloop
 	lda #$ff
 	sta gotfret
 	ldy #0
 	
-	//jump to pick if joysick
 	cmp joystate
-	bne skip
-	jmp readloop
-skip:
-	jmp pick
+	beq readloop
+	jmp handlejoy
 	
 readloop:
 	lda keycols,y
@@ -44,7 +42,7 @@ notPressed:
 	
 endread:
 
-	//catch joy trash
+	//catch joy noise
 	lda #0
 	sta $dc02
 	lda $dc00
@@ -52,7 +50,11 @@ endread:
 	lda #$ff
 	sta $dc02
 	cmp joystate
-	bne pick
+	bne handlejoy
+	
+	//joy not holded
+	lda #0
+	sta joyhold
 	
 	lda gotfret
 	cmp actfret
@@ -60,7 +62,7 @@ endread:
 	jmp end
 	
 fretchange:
-
+	
     lda actfret
 	sta prevfret
 	lda gotfret
@@ -68,19 +70,21 @@ fretchange:
 	
 	:invertfret(prevfret, keylen)
 	lda #32
-	sta 1024+tunning,x
+	sta 1024+visoff,x
 	
 	lda actfret
 	cmp #$FF
 	bne touch
 	
 release:
+	lda #$f0
+	sta sid+sidc+6
 	jmp end
 	
 touch:	
 	:invertfret(actfret, keylen)
 	lda #160
-	sta 1024+tunning,x
+	sta 1024+visoff,x
 
 	lda prevfret
 	cmp #$FF
@@ -102,11 +106,18 @@ gotfret:
 	.byte $ff
 soundtime:
 	.byte 0, 0
-free:
+joyhold:
 	.byte 0
 
+handlejoy:
+	lda #0
+	cmp joyhold
+	beq pick
+	jmp end
+	
 pick:
 	lda actfret
+	sta joyhold
 	cmp #$FF
 	bne sound
 	jmp end
@@ -114,9 +125,36 @@ pick:
 sound:
 	:invertfret(actfret, keylen)
 	lda #161
-	sta 1024+tunning,x
+	sta 1024+visoff,x
+	
+	txa
+	clc
+	adc #tunning
+	tax
+	
+	lda FreqTablePalLo,x
+	sta sid+sidc
+	lda FreqTablePalHi,x
+	sta sid+sidc+1
+	
+	lda #$13
+	sta sid+sidc+5
+	
+	lda #255
+	sta sid+sidc+6
+	
+	lda #$21
+	sta sid+sidc+4
+	
+	lda #$20
+	sta sid+sidc+4
+	
+	inc 1401
 	
 end:
+	lda joyhold
+	sta 1400
+	
 	nop
 
 }

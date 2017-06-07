@@ -34,6 +34,8 @@
 	
 .import source "string.asm"
 
+	lda #$07
+	sta sid+24
 
 loop:
 	//saving joystate
@@ -46,9 +48,9 @@ loop:
 	lda #$ff
 	sta $dc02
 	
-	:handlestring(qrow, qcol, 12, 0, 0)
-	:handlestring(arow, acol, 12, 40, 0)
-	:handlestring(zrow, zcol, 12, 80, 0)
+	:handlestring(qrow, qcol, 12, 0,  38, 0)
+	:handlestring(arow, acol, 12, 7,  43, 40)
+	:handlestring(zrow, zcol, 12, 14, 48, 80)
 	jmp loop
 	
 joystate:
@@ -103,5 +105,6 @@ zrow:
 	.byte $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80
 	
 	
+.import source "freqtable.asm"
 	
 .print "success"

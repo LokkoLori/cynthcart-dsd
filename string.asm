@@ -6,8 +6,13 @@
 {
 	//init readloop
 	lda #$ff
-	sta handlefret
+	sta gotfret
 	ldy #0
+	
+	//jump to pick if joysick
+	cmp joystate
+	bne pick
+	
 readloop:
 	lda keycols,y
 	beq endread
@@ -17,7 +22,7 @@ readloop:
 	bne notPressed
 	tya
 	clc
-	sta handlefret
+	sta gotfret
 	jmp endread
 notPressed:
 	iny
@@ -25,30 +30,78 @@ notPressed:
 	
 endread:
 
-	lda actfret
-	sta prevfret
-	lda handlefret
-	sta actfret
+	//catch joy trash
+	lda #0
+	sta $dc02
+	lda $dc00
+	sta joystate
+	lda #$ff
+	sta $dc02
+	cmp joystate
+	bne pick
+	
+	lda gotfret
+	cmp actfret
+	bne fretchange
 	jmp end
 	
-//variables storage and constructor
-actfret:
-	.byte 0
-prevfret:
-	.byte 0
-handlefret:
-	.byte 0
-soundtime:
-	.byte 0, 0
-end:
+fretchange:
+
+    lda actfret
+	sta prevfret
+	lda gotfret
+	sta actfret
 	
 	ldx prevfret
 	lda #32
 	sta 1024+tunning,x
+	
+	lda actfret
+	cmp #$FF
+	bne touch
+	
+release:
+	jmp end
+	
+touch:	
 	ldx actfret
 	lda #160
 	sta 1024+tunning,x
+
+	lda prevfret
+	cmp #$FF
+	bne hammer
+
+land:
+	jmp end
 	
+hammer:
+	jmp sound
+	
+	
+//variables storage and constructor
+actfret:
+	.byte $ff
+prevfret:
+	.byte $ff
+gotfret:
+	.byte $ff
+soundtime:
+	.byte 0, 0
+
+pick:
+	lda actfret
+	cmp #$FF
+	bne sound
+	jmp end
+	
+sound:
+	ldx actfret
+	lda #161
+	sta 1024+tunning,x
+	
+end:
 	nop
+
 }
  

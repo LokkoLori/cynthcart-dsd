@@ -32,17 +32,38 @@
 	
 	cli
 	
-	
-	.import source "string.asm"
-	
-loop:
-	jmp loop
-	
+.import source "string.asm"
 
-vicirq:
+
+loop:
 	:handlestring(qrow, qcol, 0, 0)
 	:handlestring(arow, acol, 40, 0)
 	:handlestring(zrow, zcol, 80, 0)
+	jmp loop
+	
+cntr:
+	.byte 0
+	
+vicirq:
+	pha  //store registers into stack
+    txa
+    pha       
+    tya
+    pha 
+	
+	lda #$ff //necessary
+    sta $d019
+	
+	inc cntr
+	lda cntr
+	sta 1800
+	
+	pla  //restore registers from stack
+    tay       
+    pla 
+    tax       
+    pla
+	
 	rti
 
 //        *    @    p    o    i    u    y    t    r    e    w    q
@@ -64,5 +85,7 @@ zcol:
 	.byte $BF, $BF, $DF, $DF, $EF, $EF, $F7, $F7, $FB, $FB, $FD, $FD, 0
 zrow:
 	.byte $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80
+	
+	
 	
 .print "success"

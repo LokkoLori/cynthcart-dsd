@@ -14,6 +14,15 @@
 	tax
 }
 
+.macro initsidchannel(sidc)
+{
+	lda #$01
+	sta sid+sidc+5
+	
+	lda #$F0
+	sta sid+sidc+6
+}
+
 .macro handlestring(keyrows, keycols, keylen, sidc, tunning, visoff)
 {
 	//init readloop
@@ -43,12 +52,8 @@ notPressed:
 endread:
 
 	//catch joy noise
-	lda #0
-	sta $dc02
-	lda $dc00
-	sta joystate
+	jsr readjoystate
 	lda #$ff
-	sta $dc02
 	cmp joystate
 	bne handlejoy
 	
@@ -77,8 +82,8 @@ fretchange:
 	bne touch
 	
 release:
-	lda #$f0
-	sta sid+sidc+6
+	lda #$20
+	sta sid+sidc+4
 	jmp end
 	
 touch:	
@@ -137,16 +142,7 @@ sound:
 	lda FreqTablePalHi,x
 	sta sid+sidc+1
 	
-	lda #$13
-	sta sid+sidc+5
-	
-	lda #255
-	sta sid+sidc+6
-	
 	lda #$21
-	sta sid+sidc+4
-	
-	lda #$20
 	sta sid+sidc+4
 	
 	inc 1401

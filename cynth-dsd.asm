@@ -34,10 +34,22 @@
 	
 .import source "string.asm"
 
-	lda #$07
+	lda #$00
 	sta sid+24
+	
+	:initsidchannel(0)
+	:initsidchannel(7)
+	:initsidchannel(14)
 
 loop:
+	
+	jsr joyhandling
+	:handlestring(qrow, qcol, 12, 0,  38, 0)
+	:handlestring(arow, acol, 12, 7,  43, 40)
+	:handlestring(zrow, zcol, 12, 14, 48, 80)
+	jmp loop
+	
+readjoystate:
 	//saving joystate
 	lda #0
 	sta $dc02
@@ -48,17 +60,51 @@ loop:
 	lda #$ff
 	sta $dc02
 	
-	:handlestring(qrow, qcol, 12, 0,  38, 0)
-	:handlestring(arow, acol, 12, 7,  43, 40)
-	:handlestring(zrow, zcol, 12, 14, 48, 80)
-	jmp loop
+	rts
+	
+joyhandling:
+
+	jsr readjoystate
+	lda #$ff
+	cmp joystate
+	bne joyactive
+	jmp joypassive
+joyactive:
+	lda #0
+	cmp joyisactive
+	beq joyactivated
+	jmp joyhandling_end
+	
+joyactivated:
+	lda #1
+	sta joyisactive
+	//pop up the volume
+	lda #$0F
+	sta sid+24
+	jmp joyhandling_end
+
+joypassive:
+	lda #0
+	cmp joyisactive
+	bne joyreleased
+	jmp joyhandling_end
+	
+joyreleased:
+	lda #0
+	sta joyisactive
+	//mute it
+	lda #$00
+	sta sid+24
+	
+joyhandling_end:
+	rts
 	
 joystate:
 	.byte 0
-	
+joyisactive:
+	.byte 0
 free:
 	.byte 0
-	
 cntr:
 	.byte 0
 	

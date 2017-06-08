@@ -99,6 +99,15 @@ land:
 	jmp end
 	
 hammer:
+	lda easepos
+	and #$F0
+	cmp #0
+	bne fingerpick
+	jmp sound
+fingerpick:
+	//rollback easepos
+	lda #$0F
+	sta easepos
 	jmp sound
 	
 	

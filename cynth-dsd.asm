@@ -80,7 +80,10 @@ joyactivated:
 	sta joyisactive
 	//pop up the volume
 	lda #$0F
+	sta volume
 	sta sid+24
+	lda #0
+	sta easepos
 	jmp joyhandling_end
 
 joypassive:
@@ -92,16 +95,46 @@ joypassive:
 joyreleased:
 	lda #0
 	sta joyisactive
-	//mute it
-	lda #$00
-	sta sid+24
 	
 joyhandling_end:
 	rts
 	
+//---------------------------------------------------------------------------
+	
+easevolume:
+	lda volume
+	sta 1801
+	cmp #0
+	bne volumedown 
+	jmp easevolume_end
+volumedown:
+	lda easepos
+	sta 1802
+	tax
+	lda easetable,x
+	sta volume
+	sta sid+24
+	sta 1803
+	cmp #0
+	beq easeover
+	inc easepos
+	sta 1804
+	jmp easevolume_end
+easeover:
+	lda #0
+	sta easepos
+	
+easevolume_end:
+	rts
+
+//---------------------------------------------------------------------------
+	
+	
 joystate:
 	.byte 0
 joyisactive:
+	.byte 0
+volume:
 	.byte 0
 free:
 	.byte 0
@@ -121,6 +154,8 @@ vicirq:
 	inc cntr
 	lda cntr
 	sta 1800
+	
+	jsr easevolume
 	
 	pla  //restore registers from stack
     tay       
@@ -150,6 +185,20 @@ zcol:
 zrow:
 	.byte $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80
 	
+	
+	
+easetable:
+	.byte 15, 13, 12, 11, 10, 9, 9, 8, 8, 8, 8 
+	.byte 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+	.byte 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+	.byte 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+	.byte 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+	.byte 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+	.byte 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+	.byte 1, 1, 1, 1, 1, 1, 1, 1, 0
+		  
+easepos:
+	.byte 0
 	
 .import source "freqtable.asm"
 	

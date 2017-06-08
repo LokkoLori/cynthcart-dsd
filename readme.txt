@@ -1,8 +1,8 @@
-cythcart-dsd
-rethink cythcart from Paul Slocum 
-original code downloaded from: http://www.qotile.net/cynthcart.html
+cynthcart-dsd
+forked from original cynthcart, coded by Paul Slocum 
+source downloaded from: http://www.qotile.net/cynthcart.html
 
-purpuse: create a kickass c64 instrumet for Double Score Dungeon chiptune band (a one man show)
+purpose: create a kickass c64 instrument for Double Score Dungeon chiptune band needs
 https://www.facebook.com/doublescoredungeon
 
 requested features:
@@ -16,9 +16,9 @@ build:
 make.bat
 
 it will compile the cynth-dsd.asm into cynth-dsd.prg
-and start it with WinVICE x64.exe ... pls add it to you path.
+and start it with WinVICE x64.exe ... add it to your path.
 
-v0.5 target>
+v0.5 milestone:
 
 3 "string" guitar "emulation:
 
@@ -30,19 +30,15 @@ S z x c v b n m , . / S
 
 push button on string + joystick stroke = note ... like picking a guitar
 
-low notes on right high, notes on left. Just like the bunds on a guitar neck
-high notes mask the lower bunds on the same string
+low notes on right high, notes on left. Just like frets on a guitar neck
+higher notes mask the lower frets on the same string
 
 advanced techniques:
 
-hammer: pick a note, and push an upper bund ... backpick when release the upper bound
+hammer: pick a note, and push an upper fret ... backpick when release the upper fret
 lean: like hummer, but with pressing the space bar: pitch up, release pich down
-tapping: rightmost button is the toggle empty string button. 
-         When toggole on, the joy strike sound the base note of the string.
-		 When tap a bund key it sounds its note
-
 		 
-tunings:
+tunes:
 
 standard low: E A D
 standard up: G B E

@@ -1,9 +1,9 @@
 .pc =$0801 "Basic Upstart Program"
-:BasicUpstart($c000)
+:BasicUpstart($0820)
 
 .import source "utils.asm"
 
-.pc = $c000 "program"
+.pc = $0820 "program"
 
     sei       //disable maskable IRQs
 
@@ -48,8 +48,8 @@
 loop:
 	
 	jsr joyhandling
-	:handlestring(qrow, qcol, 12, ch1,  string1, 0)
-	:handlestring(arow, acol, 12, ch2,  string2, 40)
+	:handlestring(qrow, qcol, 12, ch1, string1, 0)
+	:handlestring(arow, acol, 12, ch2, string2, 40)
 	:handlestring(zrow, zcol, 12, ch3, string3, 80)
 	jmp loop
 	

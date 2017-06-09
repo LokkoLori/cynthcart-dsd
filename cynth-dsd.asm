@@ -37,16 +37,20 @@
 	lda #$00
 	sta sid+24
 	
-	:initsidchannel(0)
-	:initsidchannel(7)
-	:initsidchannel(14)
+	.var ch1 = 0
+	.var ch2 = 7
+	.var ch3 = 14
+	
+	:initsidchannel(ch1)
+	:initsidchannel(ch2)
+	:initsidchannel(ch3)
 
 loop:
 	
 	jsr joyhandling
-	:handlestring(qrow, qcol, 12, 0,  38, 0)
-	:handlestring(arow, acol, 12, 7,  43, 40)
-	:handlestring(zrow, zcol, 12, 14, 48, 80)
+	:handlestring(qrow, qcol, 12, ch1,  string1, 0)
+	:handlestring(arow, acol, 12, ch2,  string2, 40)
+	:handlestring(zrow, zcol, 12, ch3, string3, 80)
 	jmp loop
 	
 readjoystate:
@@ -126,6 +130,80 @@ easeover:
 	
 easevolume_end:
 	rts
+	
+// ----------------------------------------
+
+effects:
+
+	lda #%0000111
+	sta free
+	:vibratechannel(ch1, cntr, free)
+	:vibratechannel(ch2, cntr, free)
+	:vibratechannel(ch3, cntr, free)
+	
+	rts
+	
+// ---------------------------------------
+
+settings:
+	
+	lda #$ff
+	cmp joystate
+	beq readsetting_keys
+	jmp settings_end
+
+readsetting_keys:
+	
+	lda #$FE
+	sta input_lo
+	
+	lda input_up
+	and #$10
+	beq f1_key_setting
+	jmp read_f3_key
+f1_key_setting: //standard bass tune E A D
+	lda #16
+	sta string1
+	lda #21
+	sta string2
+	lda #26
+	sta string3
+	
+	jmp settings_end
+	
+read_f3_key:
+	lda input_up
+	and #$20
+	beq f3_key_setting
+	jmp read_f5_key
+f3_key_setting: //standard low 3 string E A D
+	lda #28
+	sta string1
+	lda #33
+	sta string2
+	lda #38
+	sta string3
+	jmp settings_end
+	
+read_f5_key:
+	lda input_up
+	and #$40
+	beq f5_key_setting
+	jmp settings_end
+f5_key_setting:
+	//standard high 3 string G B E
+	lda #43
+	sta string1
+	lda #47
+	sta string2
+	lda #52
+	sta string3
+	//jmp settings_end
+	
+	jmp settings_end
+	
+settings_end:
+	rts
 
 //---------------------------------------------------------------------------
 	
@@ -141,6 +219,14 @@ free:
 cntr:
 	.byte 0
 	
+	// basetune, waveform
+string1:
+	.byte 28, %00100000
+string2:  
+	.byte 33, %00100000
+string3:
+	.byte 38, %00100000
+	
 vicirq:
 	pha  //store registers into stack
     txa
@@ -155,6 +241,8 @@ vicirq:
 	lda cntr
 	sta 1800
 	
+	jsr settings
+	jsr effects	
 	jsr easevolume
 	
 	pla  //restore registers from stack

@@ -15,16 +15,27 @@
 }
 
 .macro initsidchannel(sidc)
-{
+{	
 	lda #$01
 	sta sid+sidc+5
-	
 	lda #$F0
 	sta sid+sidc+6
 }
 
-.macro handlestring(keyrows, keycols, keylen, sidc, tunning, visoff)
+.macro vibratechannel(sidc, low, high)
 {
+	lda low
+	sta sid+sidc+2
+	lda high
+	sta sid+sidc+3
+}
+
+.macro handlestring(keyrows, keycols, keylen, sidc, data, visoff)
+{
+	.var basetune = data
+	.var waveform = data + 1
+	.var sidch = sid + sidc
+	
 	//init readloop
 	lda #$ff
 	sta gotfret
@@ -82,8 +93,8 @@ fretchange:
 	bne touch
 	
 release:
-	lda #$20
-	sta sid+sidc+4
+	lda #$00
+	sta sidch+4
 	jmp end
 	
 touch:	
@@ -138,21 +149,24 @@ pick:
 	
 sound:
 	:invertfret(actfret, keylen)
+	//fret num in x register
 	lda #161
 	sta 1024+visoff,x
 	
 	txa
 	clc
-	adc #tunning
+	adc basetune
 	tax
 	
 	lda FreqTablePalLo,x
-	sta sid+sidc
+	sta sidch
 	lda FreqTablePalHi,x
-	sta sid+sidc+1
+	sta sidch+1
 	
-	lda #$21
-	sta sid+sidc+4
+	lda waveform
+	ora #$01
+	sta 2000
+	sta sidch+4
 	
 	inc 1401
 	

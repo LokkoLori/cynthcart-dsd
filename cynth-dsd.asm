@@ -48,9 +48,9 @@
 loop:
 	
 	jsr joyhandling
-	:handlestring(qrow, qcol, 12, ch1, string1, 0)
-	:handlestring(arow, acol, 12, ch2, string2, 40)
-	:handlestring(zrow, zcol, 12, ch3, string3, 80)
+	:handlestring(rqrow, rqcol, 12, ch1, string1, 0)
+	:handlestring(rarow, racol, 12, ch2, string2, 40)
+	:handlestring(rzrow, rzcol, 12, ch3, string3, 80)
 	jmp loop
 	
 readjoystate:
@@ -242,7 +242,7 @@ vicirq:
 	sta 1800
 	
 	jsr settings
-	jsr effects	
+	//jsr effects	
 	jsr easevolume
 	
 	pla  //restore registers from stack
@@ -272,6 +272,27 @@ zcol:
 	.byte $BF, $BF, $DF, $DF, $EF, $EF, $F7, $F7, $FB, $FB, $FD, $FD, 0
 zrow:
 	.byte $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80
+	
+
+//        q    w    e    r    t    y    u    i    o    p    @    *    
+rqcol:                                                                
+	.byte $7F, $FD, $FD, $FB, $FB, $F7, $F7, $EF, $EF, $DF, $DF, $BF, 0
+rqrow:                                                                
+	.byte $40, $02, $40, $02, $40, $02, $40, $02, $40, $02, $40, $02 
+	
+
+//        A    S    D    F    G    H    J    K    L    :    ; 	 =    
+racol:                                                                
+	.byte $FD, $FD, $FB, $FB, $F7, $F7, $EF, $EF, $DF, $DF, $BF, $BF, 0
+rarow:                                                                
+	.byte $04, $20, $04, $20, $04, $20, $04, $20, $04, $20, $04, $20 
+	
+
+//        LS   Z    X    C    V    B    N    M    ,    .    /    RS   
+rzcol:                                                                
+	.byte $FD, $FD, $FB, $FB, $F7, $F7, $EF, $EF, $DF, $DF, $BF, $BF, 0
+rzrow:                                                                
+	.byte $80, $10, $80, $10, $80, $10, $80, $10, $80, $10, $80, $10 
 	
 	
 	

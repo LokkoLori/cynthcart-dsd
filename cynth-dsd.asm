@@ -37,6 +37,10 @@
 	lda #$00
 	sta sid+24
 	
+	//enable filters
+	lda #%00000111
+	sta sid+23
+	
 	.var ch1 = 0
 	.var ch2 = 7
 	.var ch3 = 14
@@ -52,6 +56,19 @@ loop:
 	:handlestring(rarow, racol, 12, ch2, string2, 40)
 	:handlestring(rzrow, rzcol, 12, ch3, string3, 80)
 	jmp loop
+	
+.macro geteasefunc()
+{
+	//giga hack
+	lda actease_table
+	sta funcloc+2
+	sta 1350
+	lda actease_table+1
+	sta funcloc+3
+	sta 1351
+funcloc:
+	nop
+}
 	
 readjoystate:
 	//saving joystate
@@ -82,9 +99,26 @@ joyactive:
 joyactivated:
 	lda #1
 	sta joyisactive
+	lda joystate
+	and #%00010000
+	cmp #0
+	beq firebutton
+	:writeAddress(actease_table, easetable)
+	//all filter
+	lda #%01110000
+	sta filters
+	jmp startnote
+firebutton:
+	:writeAddress(actease_table, easetable_mute)
+	//lowpass filter
+	lda #%00010000
+	sta filters
+startnote:
 	//pop up the volume
-	lda #$0F
+	:geteasefunc()
+	lda easetable
 	sta volume
+	ora filters
 	sta sid+24
 	lda #0
 	sta easepos
@@ -115,8 +149,10 @@ volumedown:
 	lda easepos
 	sta 1802
 	tax
+	:geteasefunc()
 	lda easetable,x
 	sta volume
+	ora filters
 	sta sid+24
 	sta 1803
 	cmp #0
@@ -297,17 +333,24 @@ rzrow:
 	
 	
 easetable:
-	.byte 15, 13, 12, 11, 10, 9, 9, 8, 8, 8, 8 
-	.byte 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
-	.byte 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
-	.byte 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-	.byte 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-	.byte 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
-	.byte 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
-	.byte 1, 1, 1, 1, 1, 1, 1, 1, 0
-		  
+	.byte 15, 11, 10, 9, 8, 8, 7, 7, 7, 6, 6, 6, 6
+	.byte 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+	.byte 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+	.byte 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+	.byte 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+	.byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0
+	
+easetable_mute:
+	.byte 10, 8, 6, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 1, 0
+	
 easepos:
 	.byte 0
+	
+actease_table:
+	.byte 0, 0
+	
+filters:
+	.byte %00100000
 	
 .import source "freqtable.asm"
 	

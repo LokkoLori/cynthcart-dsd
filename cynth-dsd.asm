@@ -70,6 +70,15 @@ funcloc:
 	nop
 }
 	
+.macro setwaveforms(waveform)
+{
+	lda #waveform
+	sta string1+1
+	sta string2+1
+	sta string3+1
+	sta 1370
+}
+
 readjoystate:
 	//saving joystate
 	lda #0
@@ -111,7 +120,7 @@ joyactivated:
 firebutton:
 	:writeAddress(actease_table, easetable_mute)
 	//lowpass filter
-	lda #%00010000
+	lda #%00110000
 	sta filters
 startnote:
 	//pop up the volume
@@ -225,7 +234,7 @@ read_f5_key:
 	lda input_up
 	and #$40
 	beq f5_key_setting
-	jmp settings_end
+	jmp read_f7_key
 f5_key_setting:
 	//standard high 3 string G B E
 	lda #43
@@ -234,8 +243,33 @@ f5_key_setting:
 	sta string2
 	lda #52
 	sta string3
-	//jmp settings_end
+	jmp settings_end
 	
+read_f7_key:
+	lda input_up
+	and #$08
+	beq f7_key_setting
+	lda #0
+	sta f7_sema
+	jmp settings_end
+
+f7_key_setting:
+	lda f7_sema
+	cmp #0
+	beq swichtorsion
+	jmp settings_end
+
+swichtorsion:
+	lda #1
+	sta f7_sema
+	
+	lda string1+1
+	cmp #cleanwf
+	beq distorsiON
+	:setwaveforms(cleanwf)
+	jmp settings_end
+distorsiON:
+	:setwaveforms(distorsionwf)
 	jmp settings_end
 	
 settings_end:
@@ -243,6 +277,8 @@ settings_end:
 
 //---------------------------------------------------------------------------
 	
+f7_sema:
+	.byte 0
 	
 joystate:
 	.byte 0
@@ -257,11 +293,11 @@ cntr:
 	
 	// basetune, waveform
 string1:
-	.byte 28, %00100000
+	.byte 28, cleanwf
 string2:  
-	.byte 33, %00100000
+	.byte 33, cleanwf
 string3:
-	.byte 38, %00100000
+	.byte 38, cleanwf
 	
 vicirq:
 	pha  //store registers into stack

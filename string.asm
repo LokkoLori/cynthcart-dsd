@@ -2,6 +2,9 @@
 .var input_up = $DC01
 .var sid = $D400
 
+.var distorsionwf = %00100000
+.var cleanwf = %01000000
+
 .macro invertfret(fret, keylen)
 {
 	lda #0
@@ -20,6 +23,10 @@
 	sta sid+sidc+5
 	lda #$F0
 	sta sid+sidc+6
+	lda #$FF
+	sta sid+sidc+2
+	lda #%00000011
+	sta sid+sidc+3
 }
 
 .macro vibratechannel(sidc, low, high)

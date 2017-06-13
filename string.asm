@@ -123,14 +123,15 @@ land:
 	
 hammer:
 	lda easepos
-	and #$F0
+	and #$F8
 	cmp #0
 	bne fingerpick
 	jmp sound
 fingerpick:
 	//rollback easepos
-	lda #$0F
+	lda #$08
 	sta easepos
+	:setvolumebyeasepos()
 	jmp sound
 	
 	

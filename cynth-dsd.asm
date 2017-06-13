@@ -32,6 +32,38 @@
 	
 	cli
 	
+.macro setvolumebyeasepos()
+{
+	lda easepos
+	sta 1802
+	tax
+	:geteasefunc()
+	lda easetable,x
+	sta volume
+}
+	
+.macro geteasefunc()
+{
+	//giga hack
+	lda actease_table
+	sta funcloc+2
+	sta 1350
+	lda actease_table+1
+	sta funcloc+3
+	sta 1351
+funcloc:
+	nop
+}
+	
+.macro setwaveforms(waveform)
+{
+	lda #waveform
+	sta string1+1
+	sta string2+1
+	sta string3+1
+	sta 1370
+}
+	
 .import source "string.asm"
 
 	lda #$00
@@ -58,27 +90,6 @@ loop:
 	jsr settings
 	jmp loop
 	
-.macro geteasefunc()
-{
-	//giga hack
-	lda actease_table
-	sta funcloc+2
-	sta 1350
-	lda actease_table+1
-	sta funcloc+3
-	sta 1351
-funcloc:
-	nop
-}
-	
-.macro setwaveforms(waveform)
-{
-	lda #waveform
-	sta string1+1
-	sta string2+1
-	sta string3+1
-	sta 1370
-}
 
 readjoystate:
 	//saving joystate
@@ -149,6 +160,7 @@ joyhandling_end:
 	
 //---------------------------------------------------------------------------
 	
+
 easevolume:
 	lda volume
 	sta 1801
@@ -156,12 +168,7 @@ easevolume:
 	bne volumedown 
 	jmp easevolume_end
 volumedown:
-	lda easepos
-	sta 1802
-	tax
-	:geteasefunc()
-	lda easetable,x
-	sta volume
+	:setvolumebyeasepos()
 	ora filters
 	sta sid+24
 	sta 1803
@@ -171,8 +178,9 @@ volumedown:
 	sta 1804
 	jmp easevolume_end
 easeover:
-	lda #0
+	lda #$ff
 	sta easepos
+	sta 1804
 	
 easevolume_end:
 	rts
@@ -389,7 +397,7 @@ easetable_mute:
 	.byte 10, 8, 6, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 1, 0
 	
 easepos:
-	.byte 0
+	.byte $ff
 	
 actease_table:
 	.byte 0, 0

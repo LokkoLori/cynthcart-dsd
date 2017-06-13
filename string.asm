@@ -41,6 +41,8 @@
 {
 	.var basetune = data
 	.var waveform = data + 1
+	.var actfret = data + 2
+	.var prevfret = data + 3
 	.var sidch = sid + sidc
 	
 	//init readloop
@@ -135,11 +137,7 @@ fingerpick:
 	jmp sound
 	
 	
-//variables storage and constructor
-actfret:
-	.byte $ff
-prevfret:
-	.byte $ff
+//private variables storage and constructor
 gotfret:
 	.byte $ff
 joyhold:

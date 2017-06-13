@@ -203,7 +203,18 @@ settings:
 	
 	lda #$ff
 	cmp joystate
-	beq read_commodore_key
+	bne skipsettings	
+
+	//do not set if any string is active
+	cmp string1+2
+	bne skipsettings
+	cmp string2+2
+	bne skipsettings
+	cmp string3+2
+	bne skipsettings
+
+	jmp read_commodore_key
+skipsettings:
 	jmp settings_end
 	
 read_commodore_key:
@@ -230,6 +241,7 @@ f1_key_setting: //standard bass tune E A D
 	sta string2
 	lda #26
 	sta string3
+	inc 1024+160
 	
 	jmp settings_end
 	
@@ -245,6 +257,7 @@ f3_key_setting: //standard low 3 string E A D
 	sta string2
 	lda #38
 	sta string3
+	inc 1024+161
 	jmp settings_end
 	
 read_f5_key:
@@ -260,6 +273,7 @@ f5_key_setting:
 	sta string2
 	lda #52
 	sta string3
+	inc 1024+162
 	jmp settings_end
 	
 read_f7_key:
@@ -280,6 +294,7 @@ swichtorsion:
 	lda #1
 	sta f7_sema
 	
+	inc 1024+163
 	lda string1+1
 	cmp #cleanwf
 	beq distorsiON
@@ -308,13 +323,13 @@ free:
 cntr:
 	.byte 0
 	
-	// basetune, waveform
+	// basetune, waveform, actfret, prevfret
 string1:
-	.byte 28, cleanwf
+	.byte 28, cleanwf, $ff, $ff
 string2:  
-	.byte 33, cleanwf
+	.byte 33, cleanwf, $ff, $ff
 string3:
-	.byte 38, cleanwf
+	.byte 38, cleanwf, $ff, $ff
 	
 vicirq:
 	

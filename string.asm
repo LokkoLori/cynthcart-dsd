@@ -73,8 +73,10 @@ endread:
 	jsr readjoystate
 	lda #$ff
 	cmp joystate
-	bne handlejoy
+	beq readgot
+	jmp handlejoy
 	
+readgot:
 	//joy not holded
 	lda #0
 	sta joyhold
@@ -102,6 +104,9 @@ fretchange:
 release:
 	lda #$00
 	sta sidch+4
+	inc 2002+sidc
+	lda actfret 
+	sta 2003+sidc
 	jmp end
 	
 touch:	
@@ -136,8 +141,6 @@ prevfret:
 	.byte $ff
 gotfret:
 	.byte $ff
-soundtime:
-	.byte 0, 0
 joyhold:
 	.byte 0
 
@@ -148,8 +151,9 @@ handlejoy:
 	jmp end
 	
 pick:
-	lda actfret
+	lda #1
 	sta joyhold
+	lda actfret
 	cmp #$FF
 	bne sound
 	jmp end

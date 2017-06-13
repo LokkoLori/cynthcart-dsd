@@ -55,6 +55,7 @@ loop:
 	:handlestring(rqrow, rqcol, 12, ch1, string1, 0)
 	:handlestring(rarow, racol, 12, ch2, string2, 40)
 	:handlestring(rzrow, rzcol, 12, ch3, string3, 80)
+	jsr settings
 	jmp loop
 	
 .macro geteasefunc()
@@ -300,6 +301,7 @@ string3:
 	.byte 38, cleanwf
 	
 vicirq:
+	
 	pha  //store registers into stack
     txa
     pha       
@@ -313,8 +315,7 @@ vicirq:
 	lda cntr
 	sta 1800
 	
-	jsr settings
-	//jsr effects	
+	//jsr effects
 	jsr easevolume
 	
 	pla  //restore registers from stack

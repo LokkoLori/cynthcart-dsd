@@ -195,14 +195,22 @@ settings:
 	
 	lda #$ff
 	cmp joystate
-	beq readsetting_keys
+	beq read_commodore_key
+	jmp settings_end
+	
+read_commodore_key:
+	lda #$7f
+	sta input_lo
+	lda input_up
+	and #$20
+	beq read_f_keys
 	jmp settings_end
 
-readsetting_keys:
-	
+read_f_keys:
 	lda #$FE
 	sta input_lo
 	
+read_f1_key:
 	lda input_up
 	and #$10
 	beq f1_key_setting

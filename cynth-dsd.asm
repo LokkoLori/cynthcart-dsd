@@ -46,13 +46,12 @@
 {
 	//giga hack
 	lda actease_table
-	sta funcloc+2
+	sta funcloc+1
 	sta 1350
 	lda actease_table+1
-	sta funcloc+3
+	sta funcloc+2
 	sta 1351
 funcloc:
-	nop
 }
 	
 .macro setwaveforms(waveform)
@@ -84,9 +83,9 @@ funcloc:
 loop:
 	
 	jsr joyhandling
-	:handlestring(rqrow, rqcol, 12, ch1, string1, 0)
-	:handlestring(rarow, racol, 12, ch2, string2, 40)
-	:handlestring(rzrow, rzcol, 12, ch3, string3, 80)
+	:handlestring(rqrow, rqcol, 12, ch1, string1,  0, ch2)
+	:handlestring(rarow, racol, 12, ch2, string2, 40, ch3)
+	:handlestring(rzrow, rzcol, 12, ch3, string3, 80, 0)
 	jsr settings
 	jmp loop
 	
@@ -287,10 +286,21 @@ read_f7_key:
 f7_key_setting:
 	lda f7_sema
 	cmp #0
-	beq swichtorsion
+	beq switch_qvint_mod
+	jmp settings_end
+	
+switch_qvint_mod:
+	inc 1024+163
+	lda #1
+	sta f7_sema
+	
+	lda #$ff
+	eor qvint_mode
+	sta qvint_mode
+	sta 1024+168
 	jmp settings_end
 
-swichtorsion:
+swichtorsion: //actually unused
 	lda #1
 	sta f7_sema
 	
@@ -317,6 +327,8 @@ joystate:
 joyisactive:
 	.byte 0
 volume:
+	.byte 0
+qvint_mode:
 	.byte 0
 free:
 	.byte 0

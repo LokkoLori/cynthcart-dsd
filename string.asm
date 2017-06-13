@@ -37,7 +37,7 @@
 	sta sid+sidc+3
 }
 
-.macro handlestring(keyrows, keycols, keylen, sidc, data, visoff)
+.macro handlestring(keyrows, keycols, keylen, sidc, data, visoff, qvint)
 {
 	.var basetune = data
 	.var waveform = data + 1
@@ -106,6 +106,16 @@ fretchange:
 release:
 	lda #$00
 	sta sidch+4
+	.if (qvint!=0)
+	{
+		lda #0
+		cmp qvint_mode
+		bne qvint_mute
+		jmp qvint_mute_end
+qvint_mute:
+		sta sid+qvint+4
+qvint_mute_end:
+	}
 	inc 2002+sidc
 	lda actfret 
 	sta 2003+sidc
@@ -178,13 +188,33 @@ sound:
 	sta 2000
 	sta sidch+4
 	
+	.if (qvint!=0)
+	{
+		lda #0
+		cmp qvint_mode
+		bne qvint_sound
+		jmp qvint_sound_end
+qvint_sound:
+		txa
+		clc
+		adc #7
+		tax
+		lda FreqTablePalLo,x
+		sta sid+qvint
+		lda FreqTablePalHi,x
+		sta sid+qvint+1
+		lda waveform
+		ora #$01
+		sta 2000
+		sta sid+qvint+4
+qvint_sound_end:
+	}
+	
 	inc 1401
 	
 end:
 	lda joyhold
 	sta 1400
-	
-	nop
 
 }
  

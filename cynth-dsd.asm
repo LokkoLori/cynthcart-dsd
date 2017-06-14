@@ -68,6 +68,11 @@ funcloc:
 	lda #$00
 	sta sid+24
 	
+	lda #%00000000
+	sta sid+$15
+	lda #%00101100
+	sta sid+$16
+	
 	//enable filters
 	lda #%00000111
 	sta sid+23
@@ -131,7 +136,7 @@ joyactivated:
 firebutton:
 	:writeAddress(actease_table, easetable_mute)
 	//lowpass filter
-	lda #%00110000
+	lda #%00010000
 	sta filters
 startnote:
 	//pop up the volume

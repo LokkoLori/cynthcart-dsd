@@ -3,7 +3,7 @@
 .var sid = $D400
 
 .var distorsionwf = %00100000
-.var cleanwf = %01000000
+.var cleanwf = %00100000
 
 .macro invertfret(fret, keylen)
 {
@@ -29,12 +29,14 @@
 	sta sid+sidc+3
 }
 
-.macro vibratechannel(sidc, low, high)
+.macro vibratechannel(string, ch, cntr)
 {
-	lda low
-	sta sid+sidc+2
-	lda high
-	sta sid+sidc+3
+	lda cntr
+	and #%00011111
+	sta free
+	lda #0
+	sta free+1
+	:Add(string+4, free, sid+ch, 2)
 }
 
 .macro handlestring(keyrows, keycols, keylen, sidc, data, visoff, qvint)
@@ -43,6 +45,8 @@
 	.var waveform = data + 1
 	.var actfret = data + 2
 	.var prevfret = data + 3
+	.var freklow = data + 4
+	.var frekhigh = data + 5
 	.var sidch = sid + sidc
 	
 	//init readloop
@@ -180,8 +184,10 @@ sound:
 	
 	lda FreqTablePalLo,x
 	sta sidch
+	sta data + 4
 	lda FreqTablePalHi,x
 	sta sidch+1
+	sta data + 5
 	
 	lda waveform
 	ora #$01

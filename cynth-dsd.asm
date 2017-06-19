@@ -57,9 +57,9 @@ funcloc:
 .macro setwaveforms(waveform)
 {
 	lda #waveform
-	sta string1+1
-	sta string2+1
-	sta string3+1
+	sta string1
+	sta string2
+	sta string3
 	sta 1370
 }
 	
@@ -193,11 +193,9 @@ easevolume_end:
 
 effects:
 
-	lda #%0000111
-	sta free
-	:vibratechannel(ch1, cntr, free)
-	:vibratechannel(ch2, cntr, free)
-	:vibratechannel(ch3, cntr, free)
+	:vibratechannel(string1, ch1, cntr)
+	:vibratechannel(string2, ch2, cntr)
+	:vibratechannel(string3, ch3, cntr)
 	
 	rts
 	
@@ -336,17 +334,17 @@ volume:
 qvint_mode:
 	.byte 0
 free:
-	.byte 0
+	.byte 0, 0
 cntr:
 	.byte 0
 	
 	// basetune, waveform, actfret, prevfret
 string1:
-	.byte 28, cleanwf, $ff, $ff
+	.byte 28, cleanwf, $ff, $ff, $00, $00
 string2:  
-	.byte 33, cleanwf, $ff, $ff
+	.byte 33, cleanwf, $ff, $ff, $00, $00
 string3:
-	.byte 38, cleanwf, $ff, $ff
+	.byte 38, cleanwf, $ff, $ff, $00, $00
 	
 vicirq:
 	
@@ -363,7 +361,7 @@ vicirq:
 	lda cntr
 	sta 1800
 	
-	//jsr effects
+	jsr effects
 	jsr easevolume
 	
 	pla  //restore registers from stack
